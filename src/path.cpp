@@ -53,9 +53,9 @@ void fnmerge(register char *pathP, const char *driveP,
 int fnsplit(const char *pathP, char *driveP, char *dirP,
 	char *nameP, char *extP)
 {
-	register char	*pB;
-	register int	Wrk;
-	int		Ret;
+	char	*pB;
+	int	Wrk;
+	int	Ret;
 
 	char buf[ MAXPATH+2 ];
 
