@@ -303,7 +303,7 @@ bool parse_comment(const string&line){
 		uint val=find_command(command_part,beaut),togglebit;
 		if(val!=(uint)-1&&val!=OFF)_commandState.beautifier=true;
 		switch(val){
-		case -1:
+		case UINT_MAX:
 			IssueMessage(0,COMMAND_INVALID_ARG,gen[BEAUTIFY].name);
 			return true;
 		case OFF:_commandState.beautifier=false;break;
