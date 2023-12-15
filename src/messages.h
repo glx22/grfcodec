@@ -83,7 +83,11 @@
 // -------
 
 std::string vIssueMessage(int,RenumMessageId,std::va_list&);
-std::string IssueMessage(int,RenumMessageId,...);
+std::string IssueMessageI(RenumMessageId,int,...);
+template<typename... Targs>
+std::string IssueMessage(int minSan,RenumMessageId id,Targs... Fargs){
+	return IssueMessageI(id,minSan,Fargs...);
+};
 void AutoConsoleMessages();
 void ManualConsoleMessages();
 std::string mysprintf(const char*,...);

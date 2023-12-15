@@ -150,9 +150,9 @@ void Before8(int action){
 	}
 }
 
-bool CheckLength(int alen,int elen,RenumMessageId message,...){
+bool CheckLengthI(RenumMessageId message,int alen,int elen,...){
 	va_list ap;
-	va_start(ap, message);
+	va_start(ap, elen);
 	if(alen<elen){
 		vIssueMessage(FATAL,message,ap);
 		return true;
