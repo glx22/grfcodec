@@ -24,7 +24,13 @@
 
 #include "message_mgr.h"
 
-bool CheckLength(int,int,RenumMessageId,...);
+bool vCheckLength(int,int,RenumMessageId,ParamList&);
+template<typename... Targs>
+bool CheckLength(int alen, int elen, RenumMessageId id, Targs... Fargs) {
+	ParamList params = { ParamType(Fargs)... };
+	return vCheckLength(alen, elen, id, params);
+}
+
 bool CheckTextID(uint,uint,uint);
 bool CheckID(uint,uint);
 

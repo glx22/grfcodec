@@ -76,7 +76,7 @@ public:
 		\param ap Message parameter list
 		\return The composed message
 	*/
-	std::string Display(const std::string& prefix, std::va_list& ap) const;
+	std::string Display(const std::string& prefix, ParamList& pl) const;
 
 	/*! Get the text of this message in the current language.
 		If the text is not available in the current language,

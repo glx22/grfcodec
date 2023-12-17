@@ -40,8 +40,8 @@ MessageData::MessageData(char props_, const string& default_text) : textMap() {
 	SetText(RL_DEFAULT, default_text);
 }
 
-string MessageData::Display(const string& prefix, va_list& ap) const {
-	string ret = myvsprintf(GetMessage(prefix).c_str(), ap);
+string MessageData::Display(const string& prefix, ParamList& pl) const {
+	string ret = myvsprintf(GetMessage(prefix).c_str(), pl);
 	ostream* const stream[] = {pErr, pOut, pNfo};
 	if((props & TO_MASK) != TO_NULL)
 		(*(stream[(props & TO_MASK) >> TO_SHIFT])) << ret;

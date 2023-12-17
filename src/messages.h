@@ -68,6 +68,8 @@
 //#endif
 
 #include "lang/message_english.h"
+#include <forward_list>
+#include <variant>
 
 // --------
 
@@ -81,12 +83,22 @@
 #include "lang/extra_english.h"
 
 // -------
+using ParamType = std::variant<char, const char*, int, unsigned int>;
+using ParamList = std::forward_list<ParamType>;
 
-std::string vIssueMessage(int,RenumMessageId,std::va_list&);
-std::string IssueMessage(int,RenumMessageId,...);
+std::string vIssueMessage(int,RenumMessageId,ParamList&);
+template<typename... Targs>
+std::string IssueMessage(int minSan,RenumMessageId id,Targs... Fargs){
+	ParamList params = { ParamType(Fargs)... };
+	return vIssueMessage(minSan, id, params);
+}
 void AutoConsoleMessages();
 void ManualConsoleMessages();
-std::string mysprintf(const char*,...);
-std::string myvsprintf(const char*,std::va_list&);
+std::string myvsprintf(const char*,ParamList&);
+template<typename... Targs>
+std::string mysprintf(const char*fmt,Targs... Fargs){
+	ParamList params = { ParamType(Fargs)... };
+	return myvsprintf(fmt, params);
+}
 
 #endif//_RENUM_MESSAGES_H_INCLUDED_

@@ -59,27 +59,11 @@ void ManualConsoleMessages(){
 	bAutoMessage=false;
 }
 
-string mysprintf(const char*str,...){
-	va_list ap;
-	va_start(ap, str);
-	string result = myvsprintf(str,ap);
-	va_end(ap);
-	return result;
-}
-
 #if defined DEBUG || defined _DEBUG
 static RenumMessageId curMessage;
 #endif
 
-string IssueMessage(int minSan,RenumMessageId id,...){
-	va_list ap;
-	va_start(ap, id);
-	string result = vIssueMessage(minSan,id,ap);
-	va_end(ap);
-	return result;
-}
-
-string vIssueMessage(int minSan,RenumMessageId id,va_list& arg_ptr){
+string vIssueMessage(int minSan,RenumMessageId id,ParamList& pl){
 #if defined DEBUG || defined _DEBUG
 	curMessage=id;
 #endif
@@ -113,7 +97,7 @@ string vIssueMessage(int minSan,RenumMessageId id,va_list& arg_ptr){
 	}
 	try{
 		return MessageMgr::Instance().GetMessageData(id).Display(
-			mysprintf(MessageMgr::Instance().GetExtraText(prefix).c_str(),id),arg_ptr);
+			mysprintf(MessageMgr::Instance().GetExtraText(prefix).c_str(),id),pl);
 	}catch(...){
 		(*pErr)<<MessageMgr::Instance().GetMessageData(FATAL_MESSAGE_ERROR).GetText()<<id<<endl;
 		assert(false);
@@ -121,7 +105,7 @@ string vIssueMessage(int minSan,RenumMessageId id,va_list& arg_ptr){
 	}
 }
 
-string myvsprintf(const char*fmt,va_list&arg_ptr){
+string myvsprintf(const char*fmt,ParamList&params){
 	string ret;
 	int i=-1,pad;
 	while(fmt[++i]!='\0'){
@@ -131,16 +115,24 @@ string myvsprintf(const char*fmt,va_list&arg_ptr){
 			else pad=0;
 			switch(fmt[i]){
 			case'c':
-				ret+=(char)va_arg(arg_ptr,int);
+				assert(!params.empty() && std::holds_alternative<char>(params.front()));
+				ret+=std::get<char>(params.front());
+				params.pop_front();
 				break;
 			case'd':
-				ret+=itoa(va_arg(arg_ptr,int),10,pad);
+				assert(!params.empty() && std::holds_alternative<int>(params.front()));
+				ret+=itoa(std::get<int>(params.front()), 10, pad);
+				params.pop_front();
 				break;
 			case't': // If an EXTRA cannot be used (eg for __FILE__), use %t, not %s.
-				ret+=(char*)va_arg(arg_ptr,char*);
+				assert(!params.empty() && std::holds_alternative<const char*>(params.front()));
+				ret+=std::get<const char*>(params.front());
+				params.pop_front();
 				break;
 			case's':{
-				int x=(int)va_arg(arg_ptr,int);
+				assert(!params.empty() && std::holds_alternative<int>(params.front()));
+				int x=std::get<int>(params.front());
+				params.pop_front();
 				if(x>=__LAST_EXTRA){
 #if defined DEBUG || defined _DEBUG
 					IssueMessage(0,BAD_STRING,x,curMessage,_spritenum);
@@ -154,7 +146,9 @@ string myvsprintf(const char*fmt,va_list&arg_ptr){
 					ret += MessageMgr::Instance().GetExtraText((RenumExtraTextId)x);
 				break;
 			}case'S':{
-				int x=(int)va_arg(arg_ptr,int);
+				assert(!params.empty() && std::holds_alternative<int>(params.front()));
+				int x=std::get<int>(params.front());
+				params.pop_front();
 				if(x>=__LAST_EXTRA){
 #if defined DEBUG || defined _DEBUG
 					IssueMessage(0,BAD_STRING,x,curMessage,_spritenum);
@@ -165,10 +159,12 @@ string myvsprintf(const char*fmt,va_list&arg_ptr){
 					exit(EFATAL);
 				}
 				if(x!=-1)
-					ret+=myvsprintf(MessageMgr::Instance().GetExtraText((RenumExtraTextId)x).c_str(),arg_ptr);
+					ret+=myvsprintf(MessageMgr::Instance().GetExtraText((RenumExtraTextId)x).c_str(),params);
 				break;
 			}case'x':{
-				uint val=va_arg(arg_ptr,int);
+				assert(!params.empty() && std::holds_alternative<uint>(params.front()));
+				uint val=std::get<uint>(params.front());
+				params.pop_front();
 				if(pad&&!(pad&1)){
 					while(pad||val){
 						ret+=itoa(val&0xFF,16,2);
@@ -180,11 +176,15 @@ string myvsprintf(const char*fmt,va_list&arg_ptr){
 				ret+=itoa(val,16);
 				break;
 			}case'L':{
-				uint langID=va_arg(arg_ptr,int);
+				assert(!params.empty() && std::holds_alternative<uint>(params.front()));
+				uint langID=std::get<uint>(params.front());
+				params.pop_front();
 				ret+=mysprintf(GetLangName(langID).c_str(),langID);
 				break;
 			}case'K':
-				ret+=STACK[va_arg(arg_ptr,int)];//_msgArrays[STACK].array[va_arg(arg_ptr,int)];
+				assert(!params.empty() && std::holds_alternative<int>(params.front()));
+				ret+=STACK[std::get<int>(params.front())];//_msgArrays[STACK].array[va_arg(arg_ptr,int)];
+				params.pop_front();
 				break;
 			/*case'Y':{
 				uint array=va_arg(arg_ptr,uint),offset=va_arg(arg_ptr,uint);

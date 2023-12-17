@@ -150,16 +150,13 @@ void Before8(int action){
 	}
 }
 
-bool CheckLength(int alen,int elen,RenumMessageId message,...){
-	va_list ap;
-	va_start(ap, message);
+bool vCheckLength(int alen,int elen,RenumMessageId message,ParamList&pl){
 	if(alen<elen){
-		vIssueMessage(FATAL,message,ap);
+		vIssueMessage(FATAL,message,pl);
 		return true;
 	}
 	if(alen>elen)
-		vIssueMessage(WARNING2,message,ap);
-	va_end(ap);
+		vIssueMessage(WARNING2,message,pl);
 	return false;
 }
 
